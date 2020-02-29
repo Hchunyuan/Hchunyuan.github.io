@@ -5,22 +5,5 @@
             <link></link>
         <language>zh-CN</language>
         <generator>Halo </generator>
-                <item>
-                    <title>
-                        <![CDATA[
-                            阿里云仓库
-                        ]]>
-                    </title>
-                    <link>/archives/阿里云仓库</link>
-                    <description>
-                        <![CDATA[
-                                <p>maven {<br />
-url   '<a href="https://maven.aliyun.com/nexus/content/groups/public">https://maven.aliyun.com/nexus/content/groups/public</a>'<br />
-}</p>
-
-                        ]]>
-                    </description>
-                    <pubDate>2020-02-28T23:49:18+08:00</pubDate>
-                </item>
     </channel>
 </rss>
