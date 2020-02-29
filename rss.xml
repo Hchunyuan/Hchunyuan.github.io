@@ -2,7 +2,7 @@
 <rss version="2.0">
     <channel>
                     <title>博客</title>
-            <link>.</link>
+            <link></link>
         <language>zh-CN</language>
         <generator>Halo </generator>
                 <item>
@@ -11,7 +11,7 @@
                             阿里云仓库
                         ]]>
                     </title>
-                    <link>./archives/阿里云仓库</link>
+                    <link>/archives/阿里云仓库</link>
                     <description>
                         <![CDATA[
                                 <p>maven {<br />
