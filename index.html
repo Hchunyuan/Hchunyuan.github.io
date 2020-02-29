@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
+    <title>博客</title>
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="renderer" content="webkit">
+    <meta name="theme-color" content="#fff">
+    <meta name="author" content="hcy" />
+    <meta name="keywords" content=""/>
+    <meta name="description" content="" />
+    <meta name="generator" content="Halo "/>
+    
+    <link href="./themes/anatole/source/css/font-awesome.min.css" type="text/css" rel="stylesheet"/>
+    <link href="./themes/anatole/source/css/blog_basic.min.css?version=88107691fe" rel="stylesheet">
+    <link href="./themes/anatole/source/css/style.min.css" type="text/css" rel="stylesheet" />
+
+
+    <link rel="alternate" type="application/rss+xml" title="atom 1.0" href="./atom.xml">
+    <style>
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+            background-color: #eee;
+        }
+        ::-webkit-scrollbar-thumb {
+            background-color: #3798e8;
+        }
+        ::-webkit-scrollbar-track {
+            background-color: #eee;
+        }
+        
+    </style>
+</head>
+<body>
+<div class="sidebar animated fadeInDown">
+    <div class="logo-title">
+        <div class="title">
+            <img src="./themes/anatole/source/images/logo@2x.png" style="width:127px;" />
+            <h3 title="">
+                <a href="./">博客</a>
+            </h3>
+            <div class="description">
+                    <p></p>
+            </div>
+        </div>
+    </div>
+<ul class="social-links">
+
+        <li>
+        <a target="_blank" href="./atom.xml">
+            <i class="fa fa-rss"></i>
+        </a>
+    </li>
+
+
+
+
+
+
+
+
+
+</ul>
+    <div class="footer">
+        <a target="_blank" href="#">
+            <span>Designed by </span>
+            <a href="https://www.caicai.me">CaiCai</a>
+            <div class="by_halo">
+                <a href="https://github.com/halo-dev/halo" target="_blank">Proudly published with Halo&#65281;</a>
+            </div>
+            <div class="footer_text">
+    
+            </div>
+        </a>
+    </div>
+</div>
+<div class="main">
+<div class="page-top animated fadeInDown">
+    <div class="nav">
+                        <li>
+                    <a href="/" target="_self">首页 </a>
+                </li>
+                <li>
+                    <a href="/archives" target="_self">归档 </a>
+                </li>
+    </div>
+    <div class="information">
+        <div class="back_btn">
+            <li>
+                <a onclick="window.history.go(-1)" style="display: none" class="fa fa-chevron-left"></a>
+            </li>
+        </div>
+        <div class="avatar">
+            <img src="./themes/anatole/source/images/logo.png" />
+        </div>
+    </div>
+</div>
+    <div class="autopagerize_page_element">
+        <div class="content">
+    <div class="post animated fadeInDown">
+        <div class="post-title">
+            <h3>
+                <a href="./archives/阿里云仓库">阿里云仓库</a>
+            </h3>
+        </div>
+        <div class="post-content">
+            <div class="p_part">
+                <p>maven{url'https://maven.aliyun.com/nexus/content/groups/public'}...</p>
+            </div>
+            <div class="p_part">
+                <p></p>
+            </div>
+        </div>
+        <div class="post-footer">
+            <div class="meta">
+                <div class="info">
+                    <i class="fa fa-sun-o"></i>
+                    <span class="date">2020-02-28</span>
+                    <i class="fa fa-comment-o"></i>
+                    <a href="./archives/阿里云仓库#comment_widget">Comments</a>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="./themes/anatole/source/js/jquery.min.js"></script>
+<script type="text/javascript">
+    var url = location.href;
+    var urlstatus = false;
+    $(".nav li a").each(function () {
+        if ((url + '/').indexOf($(this).attr('href')) > -1 && $(this).attr('href') != '/') {
+            $(this).addClass('current');
+            urlstatus = true;
+        } else {
+            $(this).removeClass('current');
+        }
+    });
+    if (!urlstatus) {
+        $(".nav li a").eq(0).addClass('current');
+    }
+
+</script>
+    
+</body>
+</html>
