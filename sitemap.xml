@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
                 <url>
-                <loc>http://127.0.0.1:8090/archives/阿里云仓库</loc>
+                <loc>/blog/archives/springboothttps</loc>
+                <lastmod>2020-03-02T22:29:50+08:00</lastmod>
+            </url>
+            <url>
+                <loc>/blog/archives/阿里云仓库</loc>
                 <lastmod>2020-02-28T23:49:18+08:00</lastmod>
             </url>
 </urlset>

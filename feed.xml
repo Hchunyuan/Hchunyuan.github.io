@@ -2,16 +2,61 @@
 <rss version="2.0">
     <channel>
                     <title>博客</title>
-            <link>http://127.0.0.1:8090</link>
+            <link>/blog</link>
         <language>zh-CN</language>
         <generator>Halo </generator>
+                <item>
+                    <title>
+                        <![CDATA[
+                            springboot https
+                        ]]>
+                    </title>
+                    <link>/blog/archives/springboothttps</link>
+                    <description>
+                        <![CDATA[
+                                <pre><code class="language-java">    // springboot2 写法
+    @Bean
+    public TomcatServletWebServerFactory servletContainer() {
+        TomcatServletWebServerFactory tomcat = new TomcatServletWebServerFactory() {
+            @Override
+            protected void postProcessContext(Context context) {
+                SecurityConstraint constraint = new SecurityConstraint();
+                constraint.setUserConstraint(&quot;CONFIDENTIAL&quot;);
+                SecurityCollection collection = new SecurityCollection();
+                collection.addPattern(&quot;/*&quot;);
+                constraint.addCollection(collection);
+                context.addConstraint(constraint);
+            }
+        };
+        tomcat.addAdditionalTomcatConnectors(httpConnector());
+        return tomcat;
+    }
+ 
+    @Bean
+    public Connector httpConnector() {
+        Connector connector = new Connector(&quot;org.apache.coyote.http11.Http11NioProtocol&quot;);
+        connector.setScheme(&quot;http&quot;);
+        //Connector监听的http的端口号
+        connector.setPort(80);
+        connector.setSecure(false);
+        //监听到http的端口号后转向到的https的端口号
+        connector.setRedirectPort(8088);
+        return connector;
+    }
+
+</code></pre>
+
+                        ]]>
+                    </description>
+                    <pubDate>2020-03-02T22:29:50+08:00</pubDate>
+                </item>
                 <item>
                     <title>
                         <![CDATA[
                             阿里云仓库
                         ]]>
                     </title>
-                    <link>http://127.0.0.1:8090/archives/阿里云仓库</link>
+                    <link>/blog/archives/阿里云仓库</link>
                     <description>
                         <![CDATA[
                                 <pre><code class="language-gradle">maven {
