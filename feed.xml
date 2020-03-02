@@ -2,7 +2,7 @@
 <rss version="2.0">
     <channel>
                     <title>博客</title>
-            <link>/blog</link>
+            <link>http://127.0.0.1:8090</link>
         <language>zh-CN</language>
         <generator>Halo </generator>
                 <item>
@@ -11,7 +11,7 @@
                             springboot多数据源
                         ]]>
                     </title>
-                    <link>/blog/archives/springboot多数据源</link>
+                    <link>http://127.0.0.1:8090/archives/springboot多数据源</link>
                     <description>
                         <![CDATA[
                                 <p>application.yml配置</p>
@@ -576,7 +576,7 @@ public class DynamicDataSourceRegister implements ImportBeanDefinitionRegistrar,
                             springboot配置跨域
                         ]]>
                     </title>
-                    <link>/blog/archives/springoot配置跨域</link>
+                    <link>http://127.0.0.1:8090/archives/springoot配置跨域</link>
                     <description>
                         <![CDATA[
                                 <p>第一种方法：</p>
@@ -681,7 +681,7 @@ public @interface CrossOrigin {}
                             springboot https
                         ]]>
                     </title>
-                    <link>/blog/archives/springboothttps</link>
+                    <link>http://127.0.0.1:8090/archives/springboothttps</link>
                     <description>
                         <![CDATA[
                                 <pre><code class="language-java">    // springboot2 写法
@@ -726,7 +726,7 @@ public @interface CrossOrigin {}
                             阿里云仓库
                         ]]>
                     </title>
-                    <link>/blog/archives/阿里云仓库</link>
+                    <link>http://127.0.0.1:8090/archives/阿里云仓库</link>
                     <description>
                         <![CDATA[
                                 <pre><code class="language-gradle">maven {
