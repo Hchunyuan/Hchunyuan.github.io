@@ -1,12 +1,119 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
             <title type="text">博客</title>
-    <updated>2020-03-02T22:30:17+08:00</updated>
+    <updated>2020-03-02T22:54:28+08:00</updated>
         <id>/blog</id>
         <link rel="alternate" type="text/html" href="/blog" />
         <link rel="self" type="application/atom+xml" href="/blog/atom.xml" />
     <rights>Copyright © 2020, 博客</rights>
     <generator uri="https://halo.run/" version="">Halo</generator>
+            <entry>
+                <title><![CDATA[springoot配置跨域]]></title>
+                <link rel="alternate" type="text/html" href="/blog/archives/springoot配置跨域" />
+                <id>tag:/blog,2020-03-02:springoot%E9%85%8D%E7%BD%AE%E8%B7%A8%E5%9F%9F</id>
+                <published>2020-03-02T22:54:05+08:00</published>
+                <updated>2020-03-02T22:54:05+08:00</updated>
+                <author>
+                    <name>hcy</name>
+                    <uri>/blog</uri>
+                </author>
+                <content type="html" xml:base="/blog" xml:lang="en">
+                    <![CDATA[
+                            <p>第一种方法：</p>
+<pre><code class="language-java">@Component
+public class CORSConfig {
+    @Bean
+    public CorsFilter corsFilter() {
+        final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        final CorsConfiguration config = new CorsConfiguration();
+        config.setAllowCredentials(true);
+        config.setAllowedOrigins(Collections.singletonList(&quot;*&quot;));
+        config.setAllowedHeaders(Arrays.asList(&quot;Origin&quot;, &quot;Content-Type&quot;, &quot;Accept&quot;));
+        config.setAllowedMethods(Arrays.asList(&quot;GET&quot;, &quot;POST&quot;, &quot;PUT&quot;, &quot;OPTIONS&quot;, &quot;DELETE&quot;, &quot;PATCH&quot;));
+        source.registerCorsConfiguration(&quot;/**&quot;, config);
+        return new CorsFilter(source);
+    }
+}
+
+</code></pre>
+<p>第二种方法：</p>
+<pre><code class="language-java">import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+@Configuration
+public class CorsConfig implements WebMvcConfigurer {
+
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping(&quot;/**&quot;)
+                .allowedOrigins(&quot;*&quot;)
+                .allowedMethods(&quot;GET&quot;, &quot;HEAD&quot;, &quot;POST&quot;, &quot;PUT&quot;, &quot;DELETE&quot;, &quot;OPTIONS&quot;)
+                .allowCredentials(true)
+                .maxAge(3600)
+                .allowedHeaders(&quot;*&quot;);
+    }
+}
+</code></pre>
+<p>文中WebMvcConfigurerAdapter在spring5.0已经被标记为Deprecated，点开源码可以看到：</p>
+<pre><code class="language-java">/**
+ * An implementation of {@link WebMvcConfigurer} with empty methods allowing
+ * subclasses to override only the methods they're interested in.
+ *
+ * @author Rossen Stoyanchev
+ * @since 3.1
+ * @deprecated as of 5.0 {@link WebMvcConfigurer} has default methods (made
+ * possible by a Java 8 baseline) and can be implemented directly without the
+ * need for this adapter
+ */
+@Deprecated
+public abstract class WebMvcConfigurerAdapter implements WebMvcConfigurer {}
+</code></pre>
+<p>spring5最低支持到jdk1.8，所以注释中明确表明，你可以直接实现WebMvcConfigurer接口，无需再用这个适配器，因为jdk1.8支持接口中存在default-method。</p>
+<p>第三种方法:</p>
+<pre><code class="language-java">import org.springframework.context.annotation.Configuration;
+import javax.servlet.*;
+import javax.servlet.annotation.WebFilter;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+
+@WebFilter(filterName = &quot;CorsFilter &quot;)
+@Configuration
+public class CorsFilter implements Filter {
+    @Override
+    public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
+        HttpServletResponse response = (HttpServletResponse) res;
+        response.setHeader(&quot;Access-Control-Allow-Origin&quot;,&quot;*&quot;);
+        response.setHeader(&quot;Access-Control-Allow-Credentials&quot;, &quot;true&quot;);
+        response.setHeader(&quot;Access-Control-Allow-Methods&quot;, &quot;POST, GET, PATCH, DELETE, PUT&quot;);
+        response.setHeader(&quot;Access-Control-Max-Age&quot;, &quot;3600&quot;);
+        response.setHeader(&quot;Access-Control-Allow-Headers&quot;, &quot;Origin, X-Requested-With, Content-Type, Accept&quot;);
+        chain.doFilter(req, res);
+    }
+}
+
+</code></pre>
+<p>这种办法，是基于过滤器的方式，方式简单明了，就是在response中写入这些响应头,与前两种只需配置任意一种即可</p>
+<p>第四种方法：<br />
+@CrossOrigin注解</p>
+<pre><code class="language-java">@Target({ ElementType.METHOD, ElementType.TYPE })
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+public @interface CrossOrigin {}
+
+</code></pre>
+<p>从元注解@Target可以看出，注解可以放在method、class等上面，类似RequestMapping，也就是说，整个controller下面的方法可以都受控制，也可以单个方法受控制。这个是最小粒度的cors控制办法了，精确到单个请求级别</p>
+<pre><code class="language-java">public class GoodsController {
+
+    @CrossOrigin(origins = &quot;http://localhost:4000&quot;)
+    @GetMapping(&quot;goods-url&quot;)
+    public Response queryGoodsWithGoodsUrl(@RequestParam String goodsUrl) throws Exception {}
+}   
+</code></pre>
+
+                    ]]>
+                </content>
+            </entry>
             <entry>
                 <title><![CDATA[springboot https]]></title>
                 <link rel="alternate" type="text/html" href="/blog/archives/springboothttps" />

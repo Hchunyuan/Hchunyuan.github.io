@@ -9,6 +9,7 @@
 ---
 
 ## 2020
+- <a href="/blog/archives/springoot配置跨域" title="springoot配置跨域" target="_blank">springoot配置跨域</a>
 - <a href="/blog/archives/springboothttps" title="springboot https" target="_blank">springboot https</a>
 - <a href="/blog/archives/阿里云仓库" title="阿里云仓库" target="_blank">阿里云仓库</a>
 

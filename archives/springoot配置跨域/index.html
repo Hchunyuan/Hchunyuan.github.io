@@ -3,15 +3,15 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
-    <title>springboot https · 博客</title>
+    <title>springoot配置跨域 · 博客</title>
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
     <meta name="format-detection" content="telephone=no" />
     <meta name="renderer" content="webkit">
     <meta name="theme-color" content="#fff">
     <meta name="author" content="hcy" />
-    <meta name="keywords" content="springboot https,,"/>
-    <meta name="description" content="//springboot2写法@BeanpublicTomcatServletWebServerFactoryservletContainer(){TomcatServletWebServerFactorytomcat=newTomcatServletWebServerFactory(){@Over" />
+    <meta name="keywords" content="springoot配置跨域,,"/>
+    <meta name="description" content="第一种方法：@ComponentpublicclassCORSConfig{@BeanpublicCorsFiltercorsFilter(){finalUrlBasedCorsConfigurationSourcesource=newUrlBasedCorsConfigurationSource(" />
     <meta name="generator" content="Halo "/>
         <link rel="shortcut icon" type="images/x-icon" href="http://127.0.0.1:8090/upload/2020/3/36e0aec9732a282c-21d8134e7c7e41529db4a369550e983e.jpg">
     
@@ -136,40 +136,100 @@
                 <div class="post animated fadeInDown">
                     <div class="post-title">
                         <h3>
-                            <a>springboot https</a>
+                            <a>springoot配置跨域</a>
                         </h3>
                     </div>
                     <div class="post-content">
-                        <pre><code class="language-java">    // springboot2 写法
+                        <p>第一种方法：</p>
+<pre><code class="language-java">@Component
+public class CORSConfig {
     @Bean
-    public TomcatServletWebServerFactory servletContainer() {
-        TomcatServletWebServerFactory tomcat = new TomcatServletWebServerFactory() {
-            @Override
-            protected void postProcessContext(Context context) {
-                SecurityConstraint constraint = new SecurityConstraint();
-                constraint.setUserConstraint(&quot;CONFIDENTIAL&quot;);
-                SecurityCollection collection = new SecurityCollection();
-                collection.addPattern(&quot;/*&quot;);
-                constraint.addCollection(collection);
-                context.addConstraint(constraint);
-            }
-        };
-        tomcat.addAdditionalTomcatConnectors(httpConnector());
-        return tomcat;
+    public CorsFilter corsFilter() {
+        final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        final CorsConfiguration config = new CorsConfiguration();
+        config.setAllowCredentials(true);
+        config.setAllowedOrigins(Collections.singletonList(&quot;*&quot;));
+        config.setAllowedHeaders(Arrays.asList(&quot;Origin&quot;, &quot;Content-Type&quot;, &quot;Accept&quot;));
+        config.setAllowedMethods(Arrays.asList(&quot;GET&quot;, &quot;POST&quot;, &quot;PUT&quot;, &quot;OPTIONS&quot;, &quot;DELETE&quot;, &quot;PATCH&quot;));
+        source.registerCorsConfiguration(&quot;/**&quot;, config);
+        return new CorsFilter(source);
     }
- 
-    @Bean
-    public Connector httpConnector() {
-        Connector connector = new Connector(&quot;org.apache.coyote.http11.Http11NioProtocol&quot;);
-        connector.setScheme(&quot;http&quot;);
-        //Connector监听的http的端口号
-        connector.setPort(80);
-        connector.setSecure(false);
-        //监听到http的端口号后转向到的https的端口号
-        connector.setRedirectPort(8088);
-        return connector;
-    }
+}
 
+</code></pre>
+<p>第二种方法：</p>
+<pre><code class="language-java">import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+@Configuration
+public class CorsConfig implements WebMvcConfigurer {
+
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping(&quot;/**&quot;)
+                .allowedOrigins(&quot;*&quot;)
+                .allowedMethods(&quot;GET&quot;, &quot;HEAD&quot;, &quot;POST&quot;, &quot;PUT&quot;, &quot;DELETE&quot;, &quot;OPTIONS&quot;)
+                .allowCredentials(true)
+                .maxAge(3600)
+                .allowedHeaders(&quot;*&quot;);
+    }
+}
+</code></pre>
+<p>文中WebMvcConfigurerAdapter在spring5.0已经被标记为Deprecated，点开源码可以看到：</p>
+<pre><code class="language-java">/**
+ * An implementation of {@link WebMvcConfigurer} with empty methods allowing
+ * subclasses to override only the methods they're interested in.
+ *
+ * @author Rossen Stoyanchev
+ * @since 3.1
+ * @deprecated as of 5.0 {@link WebMvcConfigurer} has default methods (made
+ * possible by a Java 8 baseline) and can be implemented directly without the
+ * need for this adapter
+ */
+@Deprecated
+public abstract class WebMvcConfigurerAdapter implements WebMvcConfigurer {}
+</code></pre>
+<p>spring5最低支持到jdk1.8，所以注释中明确表明，你可以直接实现WebMvcConfigurer接口，无需再用这个适配器，因为jdk1.8支持接口中存在default-method。</p>
+<p>第三种方法:</p>
+<pre><code class="language-java">import org.springframework.context.annotation.Configuration;
+import javax.servlet.*;
+import javax.servlet.annotation.WebFilter;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+
+@WebFilter(filterName = &quot;CorsFilter &quot;)
+@Configuration
+public class CorsFilter implements Filter {
+    @Override
+    public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
+        HttpServletResponse response = (HttpServletResponse) res;
+        response.setHeader(&quot;Access-Control-Allow-Origin&quot;,&quot;*&quot;);
+        response.setHeader(&quot;Access-Control-Allow-Credentials&quot;, &quot;true&quot;);
+        response.setHeader(&quot;Access-Control-Allow-Methods&quot;, &quot;POST, GET, PATCH, DELETE, PUT&quot;);
+        response.setHeader(&quot;Access-Control-Max-Age&quot;, &quot;3600&quot;);
+        response.setHeader(&quot;Access-Control-Allow-Headers&quot;, &quot;Origin, X-Requested-With, Content-Type, Accept&quot;);
+        chain.doFilter(req, res);
+    }
+}
+
+</code></pre>
+<p>这种办法，是基于过滤器的方式，方式简单明了，就是在response中写入这些响应头,与前两种只需配置任意一种即可</p>
+<p>第四种方法：<br />
+@CrossOrigin注解</p>
+<pre><code class="language-java">@Target({ ElementType.METHOD, ElementType.TYPE })
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+public @interface CrossOrigin {}
+
+</code></pre>
+<p>从元注解@Target可以看出，注解可以放在method、class等上面，类似RequestMapping，也就是说，整个controller下面的方法可以都受控制，也可以单个方法受控制。这个是最小粒度的cors控制办法了，精确到单个请求级别</p>
+<pre><code class="language-java">public class GoodsController {
+
+    @CrossOrigin(origins = &quot;http://localhost:4000&quot;)
+    @GetMapping(&quot;goods-url&quot;)
+    public Response queryGoodsWithGoodsUrl(@RequestParam String goodsUrl) throws Exception {}
+}   
 </code></pre>
 
                     </div>
@@ -179,7 +239,7 @@
                                 <i class="fa fa-sun-o"></i>
                                 <span class="date">2020-03-02</span>
                                 <i class="fa fa-comment-o"></i>
-                                <a href="/blog/archives/springboothttps#comment_widget">Comments</a>
+                                <a href="/blog/archives/springoot配置跨域#comment_widget">Comments</a>
                             </div>
                         </div>
                     </div>
@@ -194,24 +254,21 @@
                            class="fa fa-weibo"></a>
                     </div>
                     <div class="twitter">
-                        <a href="http://twitter.com/home?status=/blog/archives/springboothttps ,博客,springboot https,;"
+                        <a href="http://twitter.com/home?status=/blog/archives/springoot配置跨域 ,博客,springoot配置跨域,;"
                            class="fa fa-twitter"></a>
                     </div>
                 </div>
                 <div class="pagination">
                     <ul class="clearfix">
                             <li class="next pagbuttons">
-                                <a class="btn" role="navigation" href="" title="阿里云仓库">下一篇</a>
-                            </li>
-                            <li class="pre pagbuttons">
-                                <a class="btn" role="navigation" href="" title="springoot配置跨域">上一篇</a>
+                                <a class="btn" role="navigation" href="" title="springboot https">下一篇</a>
                             </li>
                     </ul>
                 </div>
                 <div id="comment_widget" style="margin: 30px;">
         <script src="//cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.min.js"></script>
         <script src="//cdn.jsdelivr.net/gh/halo-dev/halo-comment@latest/dist/halo-comment.min.js"></script>
-        <halo-comment id="3" type="post"/>
+        <halo-comment id="4" type="post"/>
                 </div>
             </div>
         </div>
