@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
                 <url>
+                <loc>/blog/archives/springboot多数据源</loc>
+                <lastmod>2020-03-02T23:00:15+08:00</lastmod>
+            </url>
+            <url>
                 <loc>/blog/archives/springoot配置跨域</loc>
                 <lastmod>2020-03-02T22:54:05+08:00</lastmod>
             </url>

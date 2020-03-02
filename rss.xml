@@ -8,7 +8,572 @@
                 <item>
                     <title>
                         <![CDATA[
-                            springoot配置跨域
+                            springboot多数据源
+                        ]]>
+                    </title>
+                    <link>/blog/archives/springboot多数据源</link>
+                    <description>
+                        <![CDATA[
+                                <p>application.yml配置</p>
+<pre><code class="language-yml">spring:
+  jpa: 
+    database-platform:org.hibernate.dialect.MySQL5InnoDBDialect
+  datasource:
+    master:
+      password: root
+      url: jdbc:mysql://127.0.0.1:3306/master?useUnicode=true&amp;characterEncoding=UTF-8
+      driver-class-name: com.mysql.jdbc.Driver
+      username: root
+      type: com.zaxxer.hikari.HikariDataSource
+    cluster:
+    - key: slave1
+      password: root
+      url: jdbc:mysql://127.0.0.1:3306/slave1?useUnicode=true&amp;characterEncoding=UTF-8
+      idle-timeout: 20000
+      driver-class-name: com.mysql.jdbc.Driver
+      username: root
+      type: com.zaxxer.hikari.HikariDataSource
+    - key: slave2
+      password: root
+      url: jdbc:mysql://127.0.0.1:3306/slave2?useUnicode=true&amp;characterEncoding=UTF-8
+      driver-class-name: com.mysql.jdbc.Driver
+      username: root
+
+</code></pre>
+<pre><code class="language-java">import lombok.extern.slf4j.Slf4j;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * @Auther: yukong
+ * @Date: 2018/8/15 10:49
+ * @Description: 数据源上下文
+ */
+@Slf4j
+public class DynamicDataSourceContextHolder {
+
+
+    /**
+     * 线程级别的私有变量
+     */
+    private static final ThreadLocal&lt;String&gt; HOLDER = new ThreadLocal&lt;&gt;();
+    /**
+     * 存储已经注册的数据源的key
+     */
+    public static List&lt;String&gt; dataSourceIds = new ArrayList&lt;&gt;();
+
+    public static String getDataSourceRouterKey() {
+        return HOLDER.get();
+    }
+
+    public static void setDataSourceRouterKey(String dataSourceRouterKey) {
+        log.info(&quot;切换至{}数据源&quot;, dataSourceRouterKey);
+        HOLDER.set(dataSourceRouterKey);
+    }
+
+    /**
+     * 设置数据源之前一定要先移除
+     */
+    public static void removeDataSourceRouterKey() {
+        HOLDER.remove();
+    }
+
+    /**
+     * 判断指定DataSrouce当前是否存在
+     *
+     * @param dataSourceId
+     * @return
+     */
+    public static boolean containsDataSource(String dataSourceId) {
+        return dataSourceIds.contains(dataSourceId);
+    }
+
+}
+
+</code></pre>
+<pre><code class="language-java">mport lombok.extern.slf4j.Slf4j;
+import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
+
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.SQLException;
+
+/**
+ * @Auther: yukong
+ * @Date: 2018/8/15 10:47
+ * @Description: 动态数据源路由配置
+ */
+@Slf4j
+public class DynamicRoutingDataSource extends AbstractRoutingDataSource {
+
+    @Override
+    protected Object determineCurrentLookupKey() {
+        String dataSourceName = DynamicDataSourceContextHolder.getDataSourceRouterKey();
+        log.info(&quot;当前数据源是：{}&quot;, dataSourceName);
+        return DynamicDataSourceContextHolder.getDataSourceRouterKey();
+    }
+
+    public DataSource getDataSource() {
+        DataSource dataSource = determineTargetDataSource();
+        return dataSource;
+    }
+}
+
+</code></pre>
+<pre><code class="language-java">import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.GenericBeanDefinition;
+import org.springframework.boot.context.properties.bind.BindResult;
+import org.springframework.boot.context.properties.bind.Bindable;
+import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.boot.context.properties.source.ConfigurationPropertyName;
+import org.springframework.boot.context.properties.source.ConfigurationPropertyNameAliases;
+import org.springframework.boot.context.properties.source.ConfigurationPropertySource;
+import org.springframework.boot.context.properties.source.MapConfigurationPropertySource;
+import org.springframework.context.EnvironmentAware;
+import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
+import org.springframework.core.env.Environment;
+import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.util.StringUtils;
+
+import javax.sql.DataSource;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * 动态数据源注册
+ * 实现 ImportBeanDefinitionRegistrar 实现数据源注册
+ * 实现 EnvironmentAware 用于读取application.yml配置
+ */
+@Slf4j
+public class DynamicDataSourceRegister implements ImportBeanDefinitionRegistrar, EnvironmentAware {
+
+
+    /**
+     * 配置上下文（也可以理解为配置文件的获取工具）
+     */
+    private Environment evn;
+
+    /**
+     * 别名
+     */
+    private final static ConfigurationPropertyNameAliases aliases = new ConfigurationPropertyNameAliases();
+
+    /**
+     * 由于部分数据源配置不同，所以在此处添加别名，避免切换数据源出现某些参数无法注入的情况
+     */
+    static {
+        aliases.addAliases(&quot;url&quot;, new String[]{&quot;jdbc-url&quot;});
+        aliases.addAliases(&quot;username&quot;, new String[]{&quot;user&quot;});
+    }
+
+    /**
+     * 存储我们注册的数据源
+     */
+    private Map&lt;String, DataSource&gt; customDataSources = new HashMap&lt;String, DataSource&gt;();
+    /**
+     * 参数绑定工具 springboot2.0新推出
+     */
+    private Binder binder;
+
+    /**
+     * ImportBeanDefinitionRegistrar接口的实现方法，通过该方法可以按照自己的方式注册bean
+     *
+     * @param annotationMetadata
+     * @param beanDefinitionRegistry
+     */
+    @Override
+    public void registerBeanDefinitions(AnnotationMetadata annotationMetadata, BeanDefinitionRegistry beanDefinitionRegistry) {
+        // 获取所有数据源配置
+        Map config, defauleDataSourceProperties;
+        BindResult&lt;Map&gt; map = binder.bind(&quot;spring.datasource.master&quot;, Map.class);
+        defauleDataSourceProperties = binder.bind(&quot;spring.datasource.master&quot;, Map.class).get();
+        // 获取数据源类型
+        String typeStr = evn.getProperty(&quot;spring.datasource.master.type&quot;);
+        // 获取数据源类型
+        Class&lt;? extends DataSource&gt; clazz = getDataSourceType(typeStr);
+        // 绑定默认数据源参数 也就是主数据源
+        DataSource consumerDatasource, defaultDatasource = bind(clazz, defauleDataSourceProperties);
+        String key = defauleDataSourceProperties.get(&quot;key&quot;).toString();
+        DynamicDataSourceContextHolder.dataSourceIds.add(key);
+
+        log.info(&quot;注册默认数据源成功&quot;);
+        // 获取其他数据源配置
+        List&lt;Map&gt; configs = binder.bind(&quot;spring.datasource.cluster&quot;, Bindable.listOf(Map.class)).get();
+        // 遍历从数据源
+        for (int i = 0; i &lt; configs.size(); i++) {
+            config = configs.get(i);
+            clazz = getDataSourceType((String) config.get(&quot;type&quot;));
+            defauleDataSourceProperties = config;
+            // 绑定参数
+            consumerDatasource = bind(clazz, defauleDataSourceProperties);
+            // 获取数据源的key，以便通过该key可以定位到数据源
+            key = config.get(&quot;key&quot;).toString();
+            customDataSources.put(key, consumerDatasource);
+            // 数据源上下文，用于管理数据源与记录已经注册的数据源key
+            DynamicDataSourceContextHolder.dataSourceIds.add(key);
+            log.info(&quot;注册数据源{}成功&quot;, key);
+        }
+        // bean定义类
+        GenericBeanDefinition define = new GenericBeanDefinition();
+        // 设置bean的类型，此处DynamicRoutingDataSource是继承AbstractRoutingDataSource的实现类
+        define.setBeanClass(DynamicRoutingDataSource.class);
+        // 需要注入的参数
+        MutablePropertyValues mpv = define.getPropertyValues();
+        // 添加默认数据源，避免key不存在的情况没有数据源可用
+        mpv.add(&quot;defaultTargetDataSource&quot;, defaultDatasource);
+        // 添加其他数据源
+        mpv.add(&quot;targetDataSources&quot;, customDataSources);
+        // 将该bean注册为datasource，不使用springboot自动生成的datasource
+        beanDefinitionRegistry.registerBeanDefinition(&quot;datasource&quot;, define);
+        log.info(&quot;注册数据源成功，一共注册{}个数据源&quot;, customDataSources.keySet().size() + 1);
+    }
+
+    /**
+     * 通过字符串获取数据源class对象
+     *
+     * @param typeStr
+     * @return
+     */
+    private Class&lt;? extends DataSource&gt; getDataSourceType(String typeStr) {
+        Class&lt;? extends DataSource&gt; type;
+        try {
+            if (StringUtils.hasLength(typeStr)) {
+                // 字符串不为空则通过反射获取class对象
+                type = (Class&lt;? extends DataSource&gt;) Class.forName(typeStr);
+            } else {
+                // 默认为hikariCP数据源，与springboot默认数据源保持一致
+               //type = HikariDataSource.class;
+                //阿里巴巴
+                type = com.alibaba.druid.pool.DruidDataSource.class;
+            }
+            return type;
+        } catch (Exception e) {
+            //无法通过反射获取class对象的情况则抛出异常，该情况一般是写错了，所以此次抛出一个runtimeexception
+            throw new IllegalArgumentException(&quot;can not resolve class with type: &quot; + typeStr);
+        }
+    }
+
+    /**
+     * 绑定参数，以下三个方法都是参考DataSourceBuilder的bind方法实现的，目的是尽量保证我们自己添加的数据源构造过程与springboot保持一致
+     *
+     * @param result
+     * @param properties
+     */
+    private void bind(DataSource result, Map properties) {
+        ConfigurationPropertySource source = new MapConfigurationPropertySource(properties);
+        Binder binder = new Binder(new ConfigurationPropertySource[]{source.withAliases(aliases)});
+        // 将参数绑定到对象
+        binder.bind(ConfigurationPropertyName.EMPTY, Bindable.ofInstance(result));
+    }
+
+    private &lt;T extends DataSource&gt; T bind(Class&lt;T&gt; clazz, Map properties) {
+        ConfigurationPropertySource source = new MapConfigurationPropertySource(properties);
+        Binder binder = new Binder(new ConfigurationPropertySource[]{source.withAliases(aliases)});
+        // 通过类型绑定参数并获得实例对象
+        return binder.bind(ConfigurationPropertyName.EMPTY, Bindable.of(clazz)).get();
+    }
+
+    /**
+     * @param clazz
+     * @param sourcePath 参数路径，对应配置文件中的值，如: spring.datasource
+     * @param &lt;T&gt;
+     * @return
+     */
+    private &lt;T extends DataSource&gt; T bind(Class&lt;T&gt; clazz, String sourcePath) {
+        Map properties = binder.bind(sourcePath, Map.class).get();
+        return bind(clazz, properties);
+    }
+
+    /**
+     * EnvironmentAware接口的实现方法，通过aware的方式注入，此处是environment对象
+     *
+     * @param environment
+     */
+    @Override
+    public void setEnvironment(Environment environment) {
+        log.info(&quot;开始注册数据源&quot;);
+        this.evn = environment;
+        // 绑定配置器
+        binder = Binder.get(evn);
+    }
+}
+
+</code></pre>
+<p>或者（阿波罗读取配置）<br />
+application.properties</p>
+<pre><code class="language-properties">app.id = edudqxykq-api
+apollo.meta = http://apps.anpeila.com:8004
+
+</code></pre>
+<p>application.yml</p>
+<pre><code class="language-yml">app:
+  id: springboot-apollo
+apollo:
+  meta: http://127.0.0.1:8080
+  bootstrap:
+    enabled: true
+    eagerLoad:
+      enabled: true
+
+</code></pre>
+<pre><code class="language-java">import com.ctrip.framework.apollo.Config;
+import com.ctrip.framework.apollo.ConfigChangeListener;
+import com.ctrip.framework.apollo.model.ConfigChangeEvent;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.GenericBeanDefinition;
+import org.springframework.boot.context.properties.bind.Bindable;
+import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.boot.context.properties.source.ConfigurationPropertyName;
+import org.springframework.boot.context.properties.source.ConfigurationPropertyNameAliases;
+import org.springframework.boot.context.properties.source.ConfigurationPropertySource;
+import org.springframework.boot.context.properties.source.MapConfigurationPropertySource;
+import org.springframework.context.EnvironmentAware;
+import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
+import org.springframework.core.env.Environment;
+import org.springframework.core.type.AnnotationMetadata;
+
+import javax.sql.DataSource;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * 动态数据源注册
+ * 实现 ImportBeanDefinitionRegistrar 实现数据源注册
+ * 实现 EnvironmentAware 用于读取application.yml配置
+ */
+@Slf4j
+public class DynamicDataSourceRegister implements ImportBeanDefinitionRegistrar, EnvironmentAware {
+    /**
+     * 别名
+     */
+    private final static ConfigurationPropertyNameAliases aliases = new ConfigurationPropertyNameAliases();
+
+    /**
+     * 由于部分数据源配置不同，所以在此处添加别名，避免切换数据源出现某些参数无法注入的情况
+     */
+    static {
+        aliases.addAliases(&quot;url&quot;, &quot;jdbc-url&quot;);
+        aliases.addAliases(&quot;username&quot;, &quot;user&quot;);
+    }
+
+    String dbHost;
+    String dbPort;
+    String dbUser, dbPwd;
+    String[] configs;
+    String dbIdleTimeout;
+    Integer dbIdleTimeout_;
+    private Config config;
+    private BeanDefinitionRegistry beanDefinitionRegistry;
+    /**
+     * 配置上下文（也可以理解为配置文件的获取工具）
+     */
+    private Environment evn;
+    /**
+     * 存储我们注册的数据源
+     */
+    /**
+     * 参数绑定工具 springboot2.0新推出
+     */
+    private Binder binder;
+
+    /**
+     * EnvironmentAware接口的实现方法，通过aware的方式注入，此处是environment对象
+     *
+     * @param environment
+     */
+    @Override
+    public void setEnvironment(Environment environment) {
+        this.evn = environment;
+        binder = Binder.get(evn);
+
+        syncPropertiesConfig();
+        config.addChangeListener(new ConfigChangeListener() {
+            @Override
+            public void onChange(ConfigChangeEvent changeEvent) {
+                syncPropertiesConfig();
+                registerDatabaseBean(beanDefinitionRegistry);
+            }
+        });
+    }
+
+    /**
+     * ImportBeanDefinitionRegistrar接口的实现方法，通过该方法可以按照自己的方式注册bean
+     *
+     * @param annotationMetadata
+     * @param beanDefinitionRegistry
+     */
+    @Override
+    public void registerBeanDefinitions(AnnotationMetadata annotationMetadata, BeanDefinitionRegistry beanDefinitionRegistry) {
+        this.beanDefinitionRegistry = beanDefinitionRegistry;
+        registerDatabaseBean(beanDefinitionRegistry);
+    }
+
+    /**
+     * 通过字符串获取数据源class对象
+     *
+     * @param typeStr
+     * @return
+     */
+    private Class&lt;? extends DataSource&gt; getDataSourceType(String typeStr) {
+        Class&lt;? extends DataSource&gt; type;
+        try {
+            type = (Class&lt;? extends DataSource&gt;) Class.forName(typeStr);
+            return type;
+        } catch (Exception e) {
+            //无法通过反射获取class对象的情况则抛出异常，该情况一般是写错了，所以此次抛出一个runtimeexception
+            throw new IllegalArgumentException(&quot;can not resolve class with type: &quot; + typeStr);
+        }
+    }
+
+    private &lt;T extends DataSource&gt; T bind(Class&lt;T&gt; clazz, Map properties) {
+        ConfigurationPropertySource source = new MapConfigurationPropertySource(properties);
+        Binder binder = new Binder(source.withAliases(aliases));
+        // 通过类型绑定参数并获得实例对象
+        return binder.bind(ConfigurationPropertyName.EMPTY, Bindable.of(clazz)).get();
+    }
+
+    private void syncPropertiesConfig() {
+        try {
+            config = com.ctrip.framework.apollo.ConfigService.getAppConfig();
+        } catch (Exception e) {
+            config = null;
+            log.error(&quot;Cannot connect to the Config Service&quot;, e);
+        }
+
+        Set&lt;String&gt; keys  = null;
+        try {
+            keys = config.getPropertyNames();
+            log.info(&quot;Supported conf keys: &quot; + keys.toString());
+        } catch (Exception ex) {
+            keys = new HashSet&lt;&gt;();
+            log.error(&quot;No conf keys got.&quot;, ex);
+        }
+
+        String log1 = &quot;Trying to get {} from Config Service.&quot;;
+        String log2 = &quot;Trying to get {} from local properties conf.&quot;;
+
+        String key_database_host = &quot;databases.host&quot;;
+        if (!evn.containsProperty(key_database_host)) {
+            log.info(log1, key_database_host);
+            dbHost = config.getProperty(key_database_host, evn.getProperty(key_database_host));
+        } else {
+            log.warn(log2, key_database_host);
+            dbHost = evn.getProperty(key_database_host);
+        }
+
+        String key_database_port = &quot;databases.port&quot;;
+        if (!evn.containsProperty(key_database_port)) {
+            log.info(log1, key_database_port);
+            dbPort = config.getProperty(key_database_port, evn.getProperty(key_database_port));
+        } else {
+            log.warn(log2, key_database_port);
+            dbPort = evn.getProperty(key_database_port);
+        }
+
+        String key_database_instances = &quot;databases.instances&quot;;
+        if (!evn.containsProperty(key_database_instances)) {
+            log.info(log1, key_database_instances);
+            configs = config.getProperty(key_database_instances, evn.getProperty(key_database_instances)).split(&quot;,&quot;);
+        } else {
+            log.warn(log2, key_database_instances);
+            configs = evn.getProperty(key_database_instances).split(&quot;,&quot;);
+        }
+
+        String key_db_username = &quot;databases.username&quot;;
+        if (!evn.containsProperty(key_db_username)) {
+            log.info(log1, key_db_username);
+            dbUser = config.getProperty(key_db_username, evn.getProperty(key_db_username));
+        } else {
+            log.warn(log2, key_db_username);
+            dbUser = evn.getProperty(key_db_username);
+        }
+
+        String key_db_password = &quot;databases.password&quot;;
+        if (!evn.containsProperty(key_db_password)) {
+            log.info(log1, key_db_password);
+            dbPwd = config.getProperty(key_db_password, evn.getProperty(key_db_password));
+        } else {
+            log.warn(log2, key_db_password);
+            dbPwd = evn.getProperty(key_db_password);
+        }
+
+        String key_db_idle_timeout = &quot;databases.idle-timeout&quot;;
+        if (!evn.containsProperty(key_db_idle_timeout)) {
+            log.info(log1, key_db_idle_timeout);
+            dbIdleTimeout = config.getProperty(key_db_idle_timeout, evn.getProperty(key_db_idle_timeout));
+        } else {
+            log.warn(log2, key_db_idle_timeout);
+            dbIdleTimeout = evn.getProperty(key_db_idle_timeout);
+        }
+        try {
+            dbIdleTimeout_ = Integer.valueOf(dbIdleTimeout);
+        } catch (Exception e) {
+            dbIdleTimeout_ = Integer.valueOf(evn.getProperty(&quot;databases.idle-timeout-default&quot;));
+        }
+    }
+
+    private void registerDatabaseBean(BeanDefinitionRegistry beanDefinitionRegistry) {
+        DynamicDataSourceContextHolder.dataSourceIds.clear();
+        if (beanDefinitionRegistry.containsBeanDefinition(&quot;datasource&quot;)) {
+            beanDefinitionRegistry.removeBeanDefinition(&quot;datasource&quot;);
+        }
+
+        Map&lt;String, DataSource&gt; customDataSources = new HashMap&lt;String, DataSource&gt;();
+        DataSource consumerDatasource = null;
+        // 获取数据源配置
+        // 遍历从数据源
+        for (int i = 0; i &lt; configs.length; i++) {
+            String config = configs[i];
+            Class&lt;? extends DataSource&gt; clazz = getDataSourceType(&quot;com.alibaba.druid.pool.DruidDataSource&quot;);
+            Map defauleDataSourceProperties = new HashMap();
+            defauleDataSourceProperties.put(&quot;key&quot;, config);
+            defauleDataSourceProperties.put(&quot;url&quot;, &quot;jdbc:mysql://&quot; + dbHost + &quot;:&quot; + dbPort + &quot;/&quot; + config + &quot;?useUnicode=true&amp;characterEncoding=UTF-8&amp;serverTimezone=CTT&quot;);
+            defauleDataSourceProperties.put(&quot;driver-class-name&quot;, &quot;com.mysql.cj.jdbc.Driver&quot;);
+            defauleDataSourceProperties.put(&quot;username&quot;, dbUser);
+            defauleDataSourceProperties.put(&quot;password&quot;, dbPwd);
+            defauleDataSourceProperties.put(&quot;idle-timeout&quot;, dbIdleTimeout_);
+            // 绑定参数
+            consumerDatasource = bind(clazz, defauleDataSourceProperties);
+            // 获取数据源的key，以便通过该key可以定位到数据源
+            customDataSources.put(config, consumerDatasource);
+            // 数据源上下文，用于管理数据源与记录已经注册的数据源key
+            DynamicDataSourceContextHolder.dataSourceIds.add(config);
+            log.info(&quot;{} successfully registered.&quot;, config);
+        }
+        // bean定义类
+        GenericBeanDefinition define = new GenericBeanDefinition();
+        // 设置bean的类型，此处DynamicRoutingDataSource是继承AbstractRoutingDataSource的实现类
+        define.setBeanClass(DynamicRoutingDataSource.class);
+        // 需要注入的参数
+        MutablePropertyValues mpv = define.getPropertyValues();
+        // 添加默认数据源，避免key不存在的情况没有数据源可用
+        mpv.add(&quot;defaultTargetDataSource&quot;, consumerDatasource);
+        // 添加其他数据源
+        mpv.add(&quot;targetDataSources&quot;, customDataSources);
+        // 将该bean注册为datasource，不使用springboot自动生成的datasource
+        beanDefinitionRegistry.registerBeanDefinition(&quot;datasource&quot;, define);
+        log.info(&quot;{} databases is configured.&quot;, customDataSources.keySet().size());
+    }
+}
+
+</code></pre>
+
+                        ]]>
+                    </description>
+                    <pubDate>2020-03-02T23:00:15+08:00</pubDate>
+                </item>
+                <item>
+                    <title>
+                        <![CDATA[
+                            springboot配置跨域
                         ]]>
                     </title>
                     <link>/blog/archives/springoot配置跨域</link>

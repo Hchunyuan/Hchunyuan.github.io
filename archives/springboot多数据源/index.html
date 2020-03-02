@@ -1,20 +1,146 @@
-<?xml version="1.0" encoding="utf-8"?>
-<rss version="2.0">
-    <channel>
-                    <title>博客</title>
-            <link>/blog</link>
-        <language>zh-CN</language>
-        <generator>Halo </generator>
-                <item>
-                    <title>
-                        <![CDATA[
-                            springboot多数据源
-                        ]]>
-                    </title>
-                    <link>/blog/archives/springboot多数据源</link>
-                    <description>
-                        <![CDATA[
-                                <p>application.yml配置</p>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
+    <title>springboot多数据源 · 博客</title>
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="renderer" content="webkit">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="author" content="hcy" />
+    <meta name="keywords" content="springboot多数据源,,"/>
+    <meta name="description" content="application.yml配置spring:jpa:database-platform:org.hibernate.dialect.MySQL5InnoDBDialectdatasource:master:password:rooturl:jdbc:mysql://127.0.0.1:3306/" />
+    <meta name="generator" content="Halo "/>
+        <link rel="shortcut icon" type="images/x-icon" href="http://127.0.0.1:8090/upload/2020/3/36e0aec9732a282c-21d8134e7c7e41529db4a369550e983e.jpg">
+    
+        
+    <link href="/blog/themes/anatole/source/css/font-awesome.min.css" type="text/css" rel="stylesheet"/>
+    <link href="/blog/themes/anatole/source/css/blog_basic.min.css?version=88107691fe" rel="stylesheet">
+    <link href="/blog/themes/anatole/source/css/style.min.css" type="text/css" rel="stylesheet" />
+
+        <link href="/blog/themes/anatole/source/plugins/prism/css/prism-Twilight.css" type="text/css" rel="stylesheet" />
+        <script type="text/javascript" src="/blog/themes/anatole/source/plugins/prism/js/prism.js"></script>
+        <style>
+            table {
+                border-spacing: 0;
+                border-collapse: collapse;
+                margin-top: 0;
+                margin-bottom: 16px;
+                display: block;
+                width: 100%;
+                overflow: auto;
+
+            }
+            table th {
+                font-weight: 600;
+            }
+            table th,
+            table td {
+                padding: 6px 13px;
+                border: 1px solid #dfe2e5;
+            }
+            table tr {
+                background-color: #fff;
+                border-top: 1px solid #c6cbd1;
+            }
+            table tr:nth-child(2n) {
+                background-color: #f6f8fa;
+            }
+        </style>
+
+    <link rel="alternate" type="application/rss+xml" title="atom 1.0" href="/blog/atom.xml">
+    <style>
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+            background-color: #eee;
+        }
+        ::-webkit-scrollbar-thumb {
+            background-color: #3798e8;
+        }
+        ::-webkit-scrollbar-track {
+            background-color: #eee;
+        }
+        
+    </style>
+</head>
+<body>
+<div class="sidebar animated fadeInDown">
+    <div class="logo-title">
+        <div class="title">
+            <img src="http://127.0.0.1:8090/upload/2020/3/36e0aec9732a282c-21d8134e7c7e41529db4a369550e983e.jpg" style="width:127px;" />
+            <h3 title="">
+                <a href="/blog/">博客</a>
+            </h3>
+            <div class="description">
+                    <p></p>
+            </div>
+        </div>
+    </div>
+<ul class="social-links">
+
+        <li>
+        <a target="_blank" href="/blog/atom.xml">
+            <i class="fa fa-rss"></i>
+        </a>
+    </li>
+
+
+
+
+
+
+
+
+
+</ul>
+    <div class="footer">
+        <a target="_blank" href="#">
+            <span>Designed by </span>
+            <a href="https://www.caicai.me">CaiCai</a>
+            <div class="by_halo">
+                <a href="https://github.com/halo-dev/halo" target="_blank">Proudly published with Halo&#65281;</a>
+            </div>
+            <div class="footer_text">
+    
+            </div>
+        </a>
+    </div>
+</div>
+<div class="main">
+<div class="page-top animated fadeInDown">
+    <div class="nav">
+                        <li>
+                    <a href="/" target="_self">首页 </a>
+                </li>
+                <li>
+                    <a href="/archives" target="_self">归档 </a>
+                </li>
+    </div>
+    <div class="information">
+        <div class="back_btn">
+            <li>
+                <a onclick="window.history.go(-1)" style="display: none" class="fa fa-chevron-left"></a>
+            </li>
+        </div>
+        <div class="avatar">
+            <img src="/blog/themes/anatole/source/images/logo.png" />
+        </div>
+    </div>
+</div>
+    <div class="autopagerize_page_element">
+        <div class="content">
+            <div class="post-page">
+                <div class="post animated fadeInDown">
+                    <div class="post-title">
+                        <h3>
+                            <a>springboot多数据源</a>
+                        </h3>
+                    </div>
+                    <div class="post-content">
+                        <p>application.yml配置</p>
 <pre><code class="language-yml">spring:
   jpa: 
     database-platform:org.hibernate.dialect.MySQL5InnoDBDialect
@@ -566,178 +692,65 @@ public class DynamicDataSourceRegister implements ImportBeanDefinitionRegistrar,
 
 </code></pre>
 
-                        ]]>
-                    </description>
-                    <pubDate>2020-03-02T23:00:15+08:00</pubDate>
-                </item>
-                <item>
-                    <title>
-                        <![CDATA[
-                            springboot配置跨域
-                        ]]>
-                    </title>
-                    <link>/blog/archives/springoot配置跨域</link>
-                    <description>
-                        <![CDATA[
-                                <p>第一种方法：</p>
-<pre><code class="language-java">@Component
-public class CORSConfig {
-    @Bean
-    public CorsFilter corsFilter() {
-        final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        final CorsConfiguration config = new CorsConfiguration();
-        config.setAllowCredentials(true);
-        config.setAllowedOrigins(Collections.singletonList(&quot;*&quot;));
-        config.setAllowedHeaders(Arrays.asList(&quot;Origin&quot;, &quot;Content-Type&quot;, &quot;Accept&quot;));
-        config.setAllowedMethods(Arrays.asList(&quot;GET&quot;, &quot;POST&quot;, &quot;PUT&quot;, &quot;OPTIONS&quot;, &quot;DELETE&quot;, &quot;PATCH&quot;));
-        source.registerCorsConfiguration(&quot;/**&quot;, config);
-        return new CorsFilter(source);
-    }
-}
-
-</code></pre>
-<p>第二种方法：</p>
-<pre><code class="language-java">import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-
-@Configuration
-public class CorsConfig implements WebMvcConfigurer {
-
-    @Override
-    public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping(&quot;/**&quot;)
-                .allowedOrigins(&quot;*&quot;)
-                .allowedMethods(&quot;GET&quot;, &quot;HEAD&quot;, &quot;POST&quot;, &quot;PUT&quot;, &quot;DELETE&quot;, &quot;OPTIONS&quot;)
-                .allowCredentials(true)
-                .maxAge(3600)
-                .allowedHeaders(&quot;*&quot;);
-    }
-}
-</code></pre>
-<p>文中WebMvcConfigurerAdapter在spring5.0已经被标记为Deprecated，点开源码可以看到：</p>
-<pre><code class="language-java">/**
- * An implementation of {@link WebMvcConfigurer} with empty methods allowing
- * subclasses to override only the methods they're interested in.
- *
- * @author Rossen Stoyanchev
- * @since 3.1
- * @deprecated as of 5.0 {@link WebMvcConfigurer} has default methods (made
- * possible by a Java 8 baseline) and can be implemented directly without the
- * need for this adapter
- */
-@Deprecated
-public abstract class WebMvcConfigurerAdapter implements WebMvcConfigurer {}
-</code></pre>
-<p>spring5最低支持到jdk1.8，所以注释中明确表明，你可以直接实现WebMvcConfigurer接口，无需再用这个适配器，因为jdk1.8支持接口中存在default-method。</p>
-<p>第三种方法:</p>
-<pre><code class="language-java">import org.springframework.context.annotation.Configuration;
-import javax.servlet.*;
-import javax.servlet.annotation.WebFilter;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-
-@WebFilter(filterName = &quot;CorsFilter &quot;)
-@Configuration
-public class CorsFilter implements Filter {
-    @Override
-    public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
-        HttpServletResponse response = (HttpServletResponse) res;
-        response.setHeader(&quot;Access-Control-Allow-Origin&quot;,&quot;*&quot;);
-        response.setHeader(&quot;Access-Control-Allow-Credentials&quot;, &quot;true&quot;);
-        response.setHeader(&quot;Access-Control-Allow-Methods&quot;, &quot;POST, GET, PATCH, DELETE, PUT&quot;);
-        response.setHeader(&quot;Access-Control-Max-Age&quot;, &quot;3600&quot;);
-        response.setHeader(&quot;Access-Control-Allow-Headers&quot;, &quot;Origin, X-Requested-With, Content-Type, Accept&quot;);
-        chain.doFilter(req, res);
-    }
-}
-
-</code></pre>
-<p>这种办法，是基于过滤器的方式，方式简单明了，就是在response中写入这些响应头,与前两种只需配置任意一种即可</p>
-<p>第四种方法：<br />
-@CrossOrigin注解</p>
-<pre><code class="language-java">@Target({ ElementType.METHOD, ElementType.TYPE })
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-public @interface CrossOrigin {}
-
-</code></pre>
-<p>从元注解@Target可以看出，注解可以放在method、class等上面，类似RequestMapping，也就是说，整个controller下面的方法可以都受控制，也可以单个方法受控制。这个是最小粒度的cors控制办法了，精确到单个请求级别</p>
-<pre><code class="language-java">public class GoodsController {
-
-    @CrossOrigin(origins = &quot;http://localhost:4000&quot;)
-    @GetMapping(&quot;goods-url&quot;)
-    public Response queryGoodsWithGoodsUrl(@RequestParam String goodsUrl) throws Exception {}
-}   
-</code></pre>
-
-                        ]]>
-                    </description>
-                    <pubDate>2020-03-02T22:54:05+08:00</pubDate>
-                </item>
-                <item>
-                    <title>
-                        <![CDATA[
-                            springboot https
-                        ]]>
-                    </title>
-                    <link>/blog/archives/springboothttps</link>
-                    <description>
-                        <![CDATA[
-                                <pre><code class="language-java">    // springboot2 写法
-    @Bean
-    public TomcatServletWebServerFactory servletContainer() {
-        TomcatServletWebServerFactory tomcat = new TomcatServletWebServerFactory() {
-            @Override
-            protected void postProcessContext(Context context) {
-                SecurityConstraint constraint = new SecurityConstraint();
-                constraint.setUserConstraint(&quot;CONFIDENTIAL&quot;);
-                SecurityCollection collection = new SecurityCollection();
-                collection.addPattern(&quot;/*&quot;);
-                constraint.addCollection(collection);
-                context.addConstraint(constraint);
-            }
-        };
-        tomcat.addAdditionalTomcatConnectors(httpConnector());
-        return tomcat;
-    }
- 
-    @Bean
-    public Connector httpConnector() {
-        Connector connector = new Connector(&quot;org.apache.coyote.http11.Http11NioProtocol&quot;);
-        connector.setScheme(&quot;http&quot;);
-        //Connector监听的http的端口号
-        connector.setPort(80);
-        connector.setSecure(false);
-        //监听到http的端口号后转向到的https的端口号
-        connector.setRedirectPort(8088);
-        return connector;
+                    </div>
+                    <div class="post-footer">
+                        <div class="meta">
+                            <div class="info">
+                                <i class="fa fa-sun-o"></i>
+                                <span class="date">2020-03-02</span>
+                                <i class="fa fa-comment-o"></i>
+                                <a href="/blog/archives/springboot多数据源#comment_widget">Comments</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="share" style="display: inline-flex">
+                    <div class="evernote">
+                        <a href="javascript:(function(){EN_CLIP_HOST='http://www.evernote.com';try{var%20x=document.createElement('SCRIPT');x.type='text/javascript';x.src=EN_CLIP_HOST+'/public/bookmarkClipper.js?'+(new%20Date().getTime()/100000);document.getElementsByTagName('head')[0].appendChild(x);}catch(e){location.href=EN_CLIP_HOST+'/clip.action?url='+encodeURIComponent(location.href)+'&title='+encodeURIComponent(document.title);}})();"
+                           ref="nofollow" target="_blank" class="fa fa-bookmark"></a>
+                    </div>
+                    <div class="weibo">
+                        <a href="javascript:void((function(s,d,e){try{}catch(e){}var f='http://service.weibo.com/share/share.php?',u=d.location.href,p=['url=',e(u),'&title=',e(d.title),'&appkey=2924220432'].join('');function a(){if(!window.open([f,p].join(''),'mb',['toolbar=0,status=0,resizable=1,width=620,height=450,left=',(s.width-620)/2,',top=',(s.height-450)/2].join('')))u.href=[f,p].join('');};if(/Firefox/.test(navigator.userAgent)){setTimeout(a,0)}else{a()}})(screen,document,encodeURIComponent));"
+                           class="fa fa-weibo"></a>
+                    </div>
+                    <div class="twitter">
+                        <a href="http://twitter.com/home?status=/blog/archives/springboot多数据源 ,博客,springboot多数据源,;"
+                           class="fa fa-twitter"></a>
+                    </div>
+                </div>
+                <div class="pagination">
+                    <ul class="clearfix">
+                            <li class="next pagbuttons">
+                                <a class="btn" role="navigation" href="" title="springboot配置跨域">下一篇</a>
+                            </li>
+                    </ul>
+                </div>
+                <div id="comment_widget" style="margin: 30px;">
+        <script src="//cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.min.js"></script>
+        <script src="//cdn.jsdelivr.net/gh/halo-dev/halo-comment@latest/dist/halo-comment.min.js"></script>
+        <halo-comment id="5" type="post"/>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="/blog/themes/anatole/source/js/jquery.min.js"></script>
+<script type="text/javascript">
+    var url = location.href;
+    var urlstatus = false;
+    $(".nav li a").each(function () {
+        if ((url + '/').indexOf($(this).attr('href')) > -1 && $(this).attr('href') != '/') {
+            $(this).addClass('current');
+            urlstatus = true;
+        } else {
+            $(this).removeClass('current');
+        }
+    });
+    if (!urlstatus) {
+        $(".nav li a").eq(0).addClass('current');
     }
 
-</code></pre>
-
-                        ]]>
-                    </description>
-                    <pubDate>2020-03-02T22:29:50+08:00</pubDate>
-                </item>
-                <item>
-                    <title>
-                        <![CDATA[
-                            阿里云仓库
-                        ]]>
-                    </title>
-                    <link>/blog/archives/阿里云仓库</link>
-                    <description>
-                        <![CDATA[
-                                <pre><code class="language-gradle">maven {
-        url   'https://maven.aliyun.com/nexus/content/groups/public'
-    }
-
-</code></pre>
-
-                        ]]>
-                    </description>
-                    <pubDate>2020-02-28T23:49:18+08:00</pubDate>
-                </item>
-    </channel>
-</rss>
+</script>
+    
+</body>
+</html>
